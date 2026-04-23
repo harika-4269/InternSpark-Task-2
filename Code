@@ -1,0 +1,55 @@
+import requests
+
+API_URL = "https://jsonplaceholder.typicode.com/posts"
+
+def fetch_data():
+    try:
+        response = requests.get(API_URL, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print("Error fetching API data:", e)
+        return []
+
+def filter_posts(posts, keyword=None, user_id=None):
+    results = posts
+
+    if keyword:
+        results = [p for p in results if keyword.lower() in p['title'].lower()]
+
+    if user_id:
+        results = [p for p in results if p['userId'] == user_id]
+
+    return results
+
+def display_posts(posts):
+    if not posts:
+        print("No results found.")
+        return
+
+    print(f"\nShowing {min(len(posts), 10)} result(s):")
+    for post in posts[:10]:
+        print("\n----------------------------")
+        print(f"ID      : {post['id']}")
+        print(f"User ID : {post['userId']}")
+        print(f"Title   : {post['title']}")
+        print(f"Body    : {post['body']}")
+
+def main():
+    print("=== API Data Fetcher ===")
+
+    data = fetch_data()
+    if not data:
+        return
+
+    keyword = input("Enter keyword (or press Enter to skip): ").strip()
+    user_id_input = input("Enter User ID (or press Enter to skip): ").strip()
+
+    user_id = int(user_id_input) if user_id_input.isdigit() else None
+
+    results = filter_posts(data, keyword if keyword else None, user_id)
+
+    display_posts(results)
+
+if __name__ == "__main__":
+    main()
